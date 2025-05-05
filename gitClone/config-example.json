@@ -1,0 +1,13 @@
+{
+    "gitUserName": "Nome Do Usuário",
+    "workSpaces": [
+      {
+        "urlBase": "github.com",
+        "gitEmail": "email@example.com"
+      },
+      {
+        "urlBase": "gitlab.com",
+        "gitEmail": "email@example2.com"
+      }
+    ]
+  }
