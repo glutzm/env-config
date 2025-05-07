@@ -1,72 +1,57 @@
 # git_mass_clone
 
-Um script Python para clonar em massa repositórios definidos em um arquivo YAML. Usa o alias
-`gitclone` (que deve apontar para o seu `clone_and_configure.py`) para aplicar configurações
-de usuário Git automaticamente.
+Script Python para clonar em massa repositórios definidos em um arquivo YAML, com opção de
+filtrar clientes por parâmetro.
 
-## Instalação
+## Instalação (escolha entre um ou outro)
+1. Criar um Virtual Environment e usar pip dentro dele
+    ```bash
+    sudo apt install python3-venv python3-pip   # se necessário
+    python3 -m venv .venv
+    source .venv/bin/activate
+    pip install pyyaml
+    chmod +x git_mass_clone.py
+    ```
 
-1. Clone ou baixe este repositório.
-2. Instale dependência:
-   ```bash
-   pip install pyyaml
-   ```
-3. Certifique-se de que o alias `gitclone` (ou um executável equivalente) esteja disponível no PATH.
-4. Torne o script executável:
-   ```bash
-   chmod +x git_mass_clone.py
-   ```
+2. Instalar o PyYAML via APT (recomendado para uso em system-wide)
+    ```bash
+    sudo apt update
+    sudo apt install python3-yaml
+    chmod +x git_mass_clone.py
+    ```
+Adicione o script como um programa executável
+```bash
+sudo ln -s /caminho/ate/env-config/gitClone/git_mass_clone.py /usr/local/bin/git-mass-clone
+which gitclone
+```
+## Crie o arquivo repos.yaml
 
-## Configuração (repos.yaml)
-
-Exemplo de estrutura:
-
+Exemplo de conteúdo de `repos.yaml` em [repos-example.yaml](repos-example.yaml):
 ```yaml
 clientes:
   cliente1:
     urlBase: https://url.repo.cliente1/
-    diretorioBase: /caminho/ate/cliente1/repositories
+    diretorioBase: /caminho/cliente1/repositorios
     projetos:
       - projeto: nomeProjeto1
-        classe: nomeGrupo1
+        classe: grupo1
         repositorios:
-          conjuntoMicroServico1:
-            - projeto1-git-servico1
-            - projeto1-git-servico2
-          conjuntoMicroServico2:
-            - projeto1-git-servico3
-      - projeto: nomeProjeto2
-        classe: nomeGrupo1
-        repositorios:
-          - projeto2-git-servico1
-  cliente2:
-    urlBase: git@url.repo.cliente2:grupo/
-    diretorioBase: /caminho/ate/cliente2/repositories
-    projetos:
-      - projeto: nomeProjeto1
-        classe: nomeGrupo3
-        repositorios:
-          - projeto1-git-servico1.git
+          - repoA
+          - repoB
 ```
-
-- **clientes**: mapeamento de cliente para dados.
-- **urlBase**: URL base de clone (HTTPS ou SSH), sempre finalizada em `/`.
-- **diretorioBase**: pasta onde serão criadas subpastas.
-- **projetos**: lista de projetos, cada um com:
-  - **projeto**: nome do projeto.
-  - **classe**: agrupamento (pasta intermediária).
-  - **repositorios**: pode ser lista simples (array) ou dicionário de grupos.
 
 ## Uso
 
-```bash
-./git_mass_clone.py repos.yaml
-```
+- Clonar todos os clientes (padrão ou `--all`):
+  ```bash
+  ./git_mass_clone.py repos.yaml
+  ./git_mass_clone.py repos.yaml --all
+  ```
 
-Cada repositório será clonado usando:
+- Clonar um ou mais clientes:
+  ```bash
+  ./git_mass_clone.py repos.yaml --cliente=cliente1
+  ./git_mass_clone.py repos.yaml --cliente=cliente1,cliente2
+  ```
 
-```bash
-gitclone <urlBase + nomeRepo> <diretorioBase>/<classe>/<projeto>[/<grupo>]/<nomeRepo>
-```
-
-As pastas intermediárias serão criadas automaticamente.
+O script irá processar apenas os clientes selecionados.

@@ -40,6 +40,8 @@ Exemplo de conteúdo de `config.json` em [config-example.json](config-example.js
 
 ```bash
 chmod +x clone_and_configure.py
+sudo ln -s /caminho/ate/env-config/gitClone/clone_and_configure.py /usr/local/bin/gitclone
+which gitclone
 ```
 
 ## Uso
