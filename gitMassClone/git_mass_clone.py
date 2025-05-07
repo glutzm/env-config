@@ -81,13 +81,20 @@ def checkout_all_branches(dest_dir):
 
 def handle_repos_list(base_url, dir_base, classe, nome_proj, repos_list):
     for repo_name in repos_list:
-        process_repo_entry(base_url, dir_base, classe, nome_proj, None, repo_name)
+        process_repo_entry(base_url, dir_base, classe, nome_proj, None, processar_repo_name(repo_name))
 
 
 def handle_repos_dict(base_url, dir_base, classe, nome_proj, repos_dict):
     for grupo, lista in repos_dict.items():
         for repo_name in lista:
-            process_repo_entry(base_url, dir_base, classe, nome_proj, grupo, repo_name)
+            process_repo_entry(base_url, dir_base, classe, nome_proj, grupo, processar_repo_name(repo_name))
+
+
+def processar_repo_name(repo):
+    repo_name = repo if isinstance(repo, str) else repo.strip()
+    if repo_name.endswith('.git'):
+        repo_name = repo_name[:-4]  # Remove o sufixo '.git'
+    return repo_name
 
 
 def process_repo_entry(base_url, dir_base, classe, nome_proj, grupo, repo_name):
