@@ -4,7 +4,9 @@ git_mass_clone.py
 
 Script para clonar em massa múltiplos repositórios definidos em um arquivo YAML.
 Utiliza o alias 'gitclone' (apontando para 'clone_and_configure.py') para executar
-cada clone com configurações de usuário.
+cada clone com configurações de usuário. Após o clone, realiza checkout de todas
+as branches remotas, retorna à branch principal e, em caso de clone já existente,
+faz pull na branch corrente.
 """
 import os
 import sys
@@ -33,27 +35,75 @@ def load_config(path):
             sys.exit(1)
 
 
-def gitclone(repo_url, dest_dir):
-    print(f"Clonando {repo_url} em {dest_dir}")
-    os.makedirs(dest_dir, exist_ok=True)
-    ret = subprocess.run(['gitclone', repo_url, dest_dir])
-    if ret.returncode != 0:
-        print(f"Erro ao clonar {repo_url}")
+def run_git_command(repo_dir, *args):
+    result = subprocess.run(['git', '-C', repo_dir] + list(args), capture_output=True, text=True)
+    if result.returncode != 0:
+        print(f"Erro no git {' '.join(args)} em {repo_dir}: {result.stderr.strip()}")
+    return result
+
+
+def clone_or_update(repo_url, dest_dir):
+    git_dir = os.path.join(dest_dir, '.git')
+    if os.path.isdir(git_dir):
+        # Já existe: faz pull na branch corrente
+        print(f"Repositório já existe em {dest_dir}, executando pull...")
+        run_git_command(dest_dir, 'pull')
+    else:
+        print(f"Clonando {repo_url} em {dest_dir}")
+        os.makedirs(dest_dir, exist_ok=True)
+        subprocess.run(['gitclone', repo_url, dest_dir])
+
+
+def checkout_all_branches(dest_dir):
+    # lista todas as branches remotas
+    result = run_git_command(dest_dir, 'branch', '-r')
+    if result.returncode != 0:
+        return
+    branches = []
+    for line in result.stdout.splitlines():
+        line = line.strip()
+        # formato remotes/origin/branch
+        if line.startswith('origin/') and '->' not in line:
+            _, _, branch = line.partition('origin/')
+            branches.append(branch)
+    # checkout cada branch
+    for branch in branches:
+        # ignora HEAD
+        if branch == 'HEAD':
+            continue
+        print(f"Fazendo checkout da branch {branch} em {dest_dir}")
+        # tenta checkout local, caso não exista, track remoto
+        run_git_command(dest_dir, 'checkout', branch) or \
+            run_git_command(dest_dir, 'checkout', '--track', f'origin/{branch}')
+    # volta para branch principal
+    for default in ('main', 'master'):
+        result = run_git_command(dest_dir, 'checkout', default)
+        if result.returncode == 0:
+            print(f"Retornado para branch {default} em {dest_dir}")
+            break
 
 
 def handle_repos_list(base_url, dir_base, classe, nome_proj, repos_list):
     for repo_name in repos_list:
-        url = base_url + repo_name
-        dest = os.path.join(dir_base, classe, nome_proj, repo_name)
-        gitclone(url, dest)
+        process_repo_entry(base_url, dir_base, classe, nome_proj, None, repo_name)
 
 
 def handle_repos_dict(base_url, dir_base, classe, nome_proj, repos_dict):
     for grupo, lista in repos_dict.items():
         for repo_name in lista:
-            url = base_url + repo_name
-            dest = os.path.join(dir_base, classe, nome_proj, grupo, repo_name)
-            gitclone(url, dest)
+            process_repo_entry(base_url, dir_base, classe, nome_proj, grupo, repo_name)
+
+
+def process_repo_entry(base_url, dir_base, classe, nome_proj, grupo, repo_name):
+    repo_url = base_url + repo_name
+    # monta caminho destino
+    parts = [dir_base, classe, nome_proj]
+    if grupo:
+        parts.append(grupo)
+    parts.append(repo_name)
+    dest = os.path.join(*parts)
+    clone_or_update(repo_url, dest)
+    checkout_all_branches(dest)
 
 
 def process_projeto(base_url, dir_base, projeto):
