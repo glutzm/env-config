@@ -5,9 +5,6 @@ git_mass_clone.py
 Script para clonar em massa múltiplos repositórios definidos em um arquivo YAML.
 Utiliza o alias 'gitclone' (apontando para 'clone_and_configure.py') para executar
 cada clone com configurações de usuário.
-
-Requisitos:
-    pip install pyyaml
 """
 import os
 import sys
@@ -37,7 +34,6 @@ def load_config(path):
 
 
 def gitclone(repo_url, dest_dir):
-    # utiliza alias `gitclone`
     print(f"Clonando {repo_url} em {dest_dir}")
     os.makedirs(dest_dir, exist_ok=True)
     ret = subprocess.run(['gitclone', repo_url, dest_dir])
@@ -45,41 +41,60 @@ def gitclone(repo_url, dest_dir):
         print(f"Erro ao clonar {repo_url}")
 
 
+def handle_repos_list(base_url, dir_base, classe, nome_proj, repos_list):
+    for repo_name in repos_list:
+        url = base_url + repo_name
+        dest = os.path.join(dir_base, classe, nome_proj, repo_name)
+        gitclone(url, dest)
+
+
+def handle_repos_dict(base_url, dir_base, classe, nome_proj, repos_dict):
+    for grupo, lista in repos_dict.items():
+        for repo_name in lista:
+            url = base_url + repo_name
+            dest = os.path.join(dir_base, classe, nome_proj, grupo, repo_name)
+            gitclone(url, dest)
+
+
+def process_projeto(base_url, dir_base, projeto):
+    nome_proj = projeto.get('projeto')
+    classe = projeto.get('classe')
+    repos = projeto.get('repositorios')
+    if not nome_proj or not classe or repos is None:
+        print(f"Projeto inválido ou incompleto: {projeto}")
+        return
+
+    if isinstance(repos, list):
+        handle_repos_list(base_url, dir_base, classe, nome_proj, repos)
+    elif isinstance(repos, dict):
+        handle_repos_dict(base_url, dir_base, classe, nome_proj, repos)
+    else:
+        print(f"Formato de repositórios desconhecido para {nome_proj}")
+
+
+def process_cliente(cliente_name, data):
+    url_base = data.get('urlBase', '').rstrip('/') + '/'
+    dir_base = data.get('diretorioBase')
+    if not url_base or not dir_base:
+        print(f"Configuração incompleta para {cliente_name}, pulando.")
+        return
+
+    projetos = data.get('projetos', [])
+    for projeto in projetos:
+        process_projeto(url_base, dir_base, projeto)
+
+
 def main():
     args = parse_args()
     cfg = load_config(args.config_file)
 
     clientes = cfg.get('clientes', {})
+    if not clientes:
+        print("Nenhum cliente definido no arquivo de configuração.")
+        sys.exit(1)
+
     for cliente, data in clientes.items():
-        url_base = data.get('urlBase', '').rstrip('/') + '/'
-        dir_base = data.get('diretorioBase')
-        if not url_base or not dir_base:
-            print(f"Configuração incompleta para {cliente}, pulando.")
-            continue
-
-        projetos = data.get('projetos', [])
-        for proj in projetos:
-            nome_proj = proj.get('projeto')
-            classe = proj.get('classe')
-            repos = proj.get('repositorios', {})
-
-            # caso repositorios seja lista simples
-            if isinstance(repos, list):
-                for repo_name in repos:
-                    repo_url = url_base + repo_name
-                    dest = os.path.join(dir_base, classe, nome_proj, repo_name)
-                    gitclone(repo_url, dest)
-
-            # caso seja dict de grupos
-            elif isinstance(repos, dict):
-                for grupo, lista in repos.items():
-                    for repo_name in lista:
-                        repo_url = url_base + repo_name
-                        dest = os.path.join(dir_base, classe, nome_proj, grupo, repo_name)
-                        gitclone(repo_url, dest)
-
-            else:
-                print(f"Formato de repositórios inválido em projeto {nome_proj}")
+        process_cliente(cliente, data)
 
 if __name__ == '__main__':
     main()
