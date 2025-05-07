@@ -1,0 +1,35 @@
+---
+clientes:
+  cliente1: # nome do cliente
+    urlBase: https://url.repo.cliente1/ # url de clone com https
+    diretorioBase: /caminho/ate/cliente1/repositories # diretório base para onde irá o clone
+    projetos: # lista de projetos
+      - projeto: nomeProjeto1 # nome do projeto
+        classe: nomeGrupo1 # agrupamento do projeto
+        repositorios: # lista de repositórios
+          conjuntoMicroServico1: # sub-lista de repositórios
+            - projeto1-git-servico1 # nome do repositório
+            - projeto1-git-servico2
+          conjuntoMicroServico2:
+            - projeto1-git-servico3
+            - projeto1-git-servico4
+            - projeto1-git-servico5
+      - projeto: nomeProjeto2
+        classe: nomeGrupo1
+        repositorios:
+          conjuntoMicroServico1:
+            - projeto2-git-servico1
+      - projeto: nomeProjeto3
+        classe: nomeGrupo2
+        repositorios:
+          - projeto3-git-servico1
+          - projeto3-git-servico2
+  cliente2:
+    urlBase: git@url.repo.cliente2:grupo/ # url de clone com ssh
+    diretorioBase: /caminho/ate/cliente2/repositories
+    projetos:
+      - projeto: nomeProjeto1
+        classe: nomeGrupo3
+        repositorios:
+          - projeto1-git-servico1.git
+          - projeto1-git-servico2.git
