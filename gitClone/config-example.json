@@ -1,13 +1,11 @@
 {
-    "gitUserName": "Nome Do Usuário",
-    "workSpaces": [
-      {
-        "urlBase": "github.com",
-        "gitEmail": "email@example.com"
-      },
-      {
-        "urlBase": "gitlab.com",
-        "gitEmail": "email@example2.com"
-      }
-    ]
+  "gitUserName": "Nome Do Usuário",
+  "clientes": {
+    "cliente1": {
+      "gitEmail": "email@example.com"
+    },
+    "cliente2": {
+      "gitEmail": "email@example2.com"
+    }
   }
+}
