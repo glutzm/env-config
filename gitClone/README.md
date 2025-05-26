@@ -47,14 +47,14 @@ which gitclone
 ## Uso
 
 ```bash
-./clone_and_configure.py <url-do-repositorio> <diretorio-de-destino>
+gitclone <url-do-repositorio> <diretorio-de-destino>
 ```
 
 ### Exemplos
 
 - Clonar de GitHub e configurar email:
   ```bash
-  ./clone_and_configure.py \
+  gitclone \
     https://github.com/usuario/projeto.git \
     ~/projetos/projeto
   ```
@@ -62,7 +62,7 @@ which gitclone
 
 - Clonar de GitLab sem regra:
   ```bash
-  ./clone_and_configure.py \
+  gitclone \
     https://bitbucket.org/usuario/outro.git \
     /dados/outro
   ```
