@@ -1,0 +1,17 @@
+# Copie este arquivo para ~/.config/vpnctl/vpnctl.conf (ou para o caminho
+# indicado pela variável de ambiente VPNCTL_CONFIG) e preencha com seus dados.
+
+# --- NetExtender: Conexão 1 ---
+# Nome do cliente em que você está se conectando
+NE1_CLIENT_NAME="cliente-1"
+# Nome da conexão atribuído ao configurar o perfil no NetExtender
+NE1_CONNECTION_NAME="nome-da-conexao-1"
+# Trecho único da linha "Server" retornada por `nxcli status` quando esta
+# conexão está ativa (ex: o host/domínio do servidor). Rode `nxcli status`
+# manualmente enquanto conectado para descobrir o valor exato.
+NE1_SERVER_PATTERN="servidor1.exemplo.com"
+
+# --- NetExtender: Conexão 2 ---
+NE2_CLIENT_NAME="cliente-2"
+NE2_CONNECTION_NAME="nome-da-conexao-2"
+NE2_SERVER_PATTERN="servidor2.exemplo.com"
