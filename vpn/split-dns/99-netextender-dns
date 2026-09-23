@@ -1,0 +1,57 @@
+#!/bin/bash
+#
+# NetworkManager dispatcher script for SonicWall NetExtender
+# Configures per-link DNS (split-DNS) with systemd-resolved
+#
+# Place this file in:
+#   /etc/NetworkManager/dispatcher.d/99-netextender-dns
+# Then:
+#   sudo chmod +x /etc/NetworkManager/dispatcher.d/99-netextender-dns
+#
+# Fill in the placeholders below for each of your VPN clients.
+#
+
+set -euo pipefail
+
+INTERFACE="${1:-}"
+STATUS="${2:-}"
+
+# Only act on NetExtender interfaces
+if [[ ! "$INTERFACE" =~ ^(snwl|.*ssltunnel) ]] || [[ "$STATUS" != "up" ]]; then
+    exit 0
+fi
+
+# Give the interface a moment to finish coming up
+sleep 3
+
+# Read the DNS servers that NetExtender actually pushed
+DNS_LIST=$(resolvectl dns "$INTERFACE" 2>/dev/null | tr -d '\n' || true)
+
+# ---------------------------------------------------------------------------
+# Client 1 – replace the placeholders with real values
+# ---------------------------------------------------------------------------
+# Example detection: match one or more internal DNS IPs of this client
+if echo "$DNS_LIST" | grep -qE 'DNS_IP_CLIENT1_A|DNS_IP_CLIENT1_B'; then
+    resolvectl dns "$INTERFACE" DNS_IP_CLIENT1_A DNS_IP_CLIENT1_B
+    resolvectl domain "$INTERFACE" example.client1.tld internal.client1
+    resolvectl flush-caches
+    echo "NetExtender: Client 1 DNS config applied on $INTERFACE" | systemd-cat -t netextender-dns
+
+# ---------------------------------------------------------------------------
+# Client 2 – replace the placeholders with real values
+# ---------------------------------------------------------------------------
+elif echo "$DNS_LIST" | grep -qE 'DNS_IP_CLIENT2_A|DNS_IP_CLIENT2_B'; then
+    resolvectl dns "$INTERFACE" DNS_IP_CLIENT2_A DNS_IP_CLIENT2_B
+    resolvectl domain "$INTERFACE" example.client2.tld internal.client2
+    resolvectl flush-caches
+    echo "NetExtender: Client 2 DNS config applied on $INTERFACE" | systemd-cat -t netextender-dns
+
+# ---------------------------------------------------------------------------
+# Any other NetExtender connection
+# ---------------------------------------------------------------------------
+else
+    # Clear forced domains so the VPN can use whatever it pushed
+    resolvectl domain "$INTERFACE" ""
+    resolvectl flush-caches
+    echo "NetExtender: unknown client on $INTERFACE – using pushed DNS only" | systemd-cat -t netextender-dns
+fi

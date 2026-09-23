@@ -138,3 +138,10 @@ Como o `vpnctl` pede confirmação interativa por padrão, chamadas via cron **p
 - `sudo` é necessário apenas para os comandos do Tailscale. Se quiser evitar o prompt de senha em uso interativo,
   configure uma regra específica no `visudo` para `tailscale up`/`tailscale down` — evite liberar `NOPASSWD` para o
   comando inteiro `sudo` de forma genérica.
+
+---
+
+# Bônus
+
+Caso queira otimizar consultas DNS dentro das conexões com NetExtender configuradas com split-tunnel
+siga para o tutorial [NetExtender Split-DNS helper (systemd-resolved + NetworkManager)](split-dns/README.md).
