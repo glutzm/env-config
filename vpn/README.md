@@ -78,14 +78,15 @@ O arquivo `vpnctl.conf` real fica de fora do git graças ao `.gitignore` incluí
 vpnctl <ação> [--yes]
 ```
 
-| Ação       | Efeito                                          |
-|------------|-------------------------------------------------|
-| `ne1-up`   | Conecta à Conexão 1 do NetExtender              |
-| `ne1-down` | Desconecta do NetExtender                       |
-| `ne2-up`   | Conecta à Conexão 2 do NetExtender              |
-| `ne2-down` | Desconecta do NetExtender                       |
-| `ts-up`    | Conecta ao Tailscale (`sudo tailscale up`)      |
-| `ts-down`  | Desconecta do Tailscale (`sudo tailscale down`) |
+| Ação       | Efeito                                                                  |
+|------------|-------------------------------------------------------------------------|
+| `ne1-up`   | Conecta à Conexão 1 do NetExtender                                      |
+| `ne1-down` | Desconecta do NetExtender                                               |
+| `ne2-up`   | Conecta à Conexão 2 do NetExtender                                      |
+| `ne2-down` | Desconecta do NetExtender                                               |
+| `ts-up`    | Conecta ao Tailscale (`sudo tailscale up`)                              |
+| `ts-down`  | Desconecta do Tailscale (`sudo tailscale down`)                         |
+| `status`   | Verifica o status de ambos clientes para saber se está conectado ou não |
 
 Se você tentar subir uma conexão enquanto outra já está ativa, o script pergunta interativamente se deve desconectá-la
 antes de prosseguir. Responder qualquer coisa diferente de `s`/`sim` aborta a operação sem mexer em nada.
@@ -111,6 +112,7 @@ alias ne2='vpnctl ne2-up'
 alias ne2off='vpnctl ne2-down'
 alias ts='vpnctl ts-up'
 alias tsoff='vpnctl ts-down'
+alias vpn-status='vpnctl status'
 ```
 
 Depois, recarregue o shell:

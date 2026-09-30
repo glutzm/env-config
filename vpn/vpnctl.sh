@@ -4,7 +4,7 @@
 # garantindo que apenas uma esteja ativa por vez.
 #
 # Uso: vpnctl.sh <ação> [--yes]
-#   Ações: ne1-up | ne1-down | ne2-up | ne2-down | ts-up | ts-down
+#   Ações: ne1-up | ne1-down | ne2-up | ne2-down | ts-up | ts-down | status
 #   --yes  : não pergunta, desconecta a outra VPN automaticamente se necessário
 #            (uso pensado para chamadas não-interativas, ex: cron)
 #
@@ -117,11 +117,16 @@ ensure_netextender_disconnected_if_active() {
   fi
 }
 
+vpn_status() {
+  tailscale status
+  nxcli status
+}
+
 # --- Parse de argumentos ---
 
 usage() {
   echo "Uso: $(basename "$0") <ação> [--yes]" >&2
-  echo "Ações: ne1-up | ne1-down | ne2-up | ne2-down | ts-up | ts-down" >&2
+  echo "Ações: ne1-up | ne1-down | ne2-up | ne2-down | ts-up | ts-down | status" >&2
 }
 
 ACTION=""
@@ -129,7 +134,7 @@ for arg in "$@"; do
   case "$arg" in
     --yes) AUTO_YES=true ;;
     -h|--help) usage; exit 0 ;;
-    ne1-up|ne1-down|ne2-up|ne2-down|ts-up|ts-down) ACTION="$arg" ;;
+    ne1-up|ne1-down|ne2-up|ne2-down|ts-up|ts-down|status) ACTION="$arg" ;;
     *) echo "Argumento desconhecido: $arg" >&2; usage; exit 1 ;;
   esac
 done
@@ -161,6 +166,9 @@ case "$ACTION" in
     ;;
   ts-down)
     tailscale_disconnect
+    ;;
+  status)
+    vpn_status
     ;;
   *)
     usage
